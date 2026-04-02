@@ -1,0 +1,467 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/theme.css' %}" rel="stylesheet">
+<style>
+.kpi-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid #66B2FF;
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem var(--theme-shadow);
+}
+
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #66B2FF;
+}
+
+.kpi-label {
+    font-size: 0.9rem;
+    color: var(--theme-text);
+    opacity: 0.8;
+}
+
+.chart-container {
+    position: relative;
+    height: 300px;
+    margin: 1rem 0;
+}
+
+.status-badge {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.table-responsive {
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.prazo-critico {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.prazo-normal {
+    color: #28a745;
+}
+
+.prazo-atencao {
+    color: #ffc107;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">
+                <i class="fas fa-chart-line text-primary me-2"></i>
+                Dashboard Executivo
+            </h1>
+            <p class="text-muted mb-0">Visão estratégica e KPIs do escritório</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-primary btn-sm me-2" onclick="window.print()">
+                <i class="fas fa-print me-1"></i>Imprimir
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="location.reload()">
+                <i class="fas fa-sync-alt me-1"></i>Atualizar
+            </button>
+        </div>
+    </div>
+
+    <!-- KPIs Financeiros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="text-primary mb-3">
+                <i class="fas fa-dollar-sign me-2"></i>Indicadores Financeiros
+            </h5>
+        </div>
+        <div class="col-md-2">
+            <div class="card kpi-card h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-value">R$ {{ receitas_mes|floatformat:2 }}</div>
+                    <div class="kpi-label">Receitas do Mês</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card kpi-card h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-value">R$ {{ despesas_mes|floatformat:2 }}</div>
+                    <div class="kpi-label">Despesas do Mês</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card kpi-card h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-value {% if saldo_mes >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        R$ {{ saldo_mes|floatformat:2 }}
+                    </div>
+                    <div class="kpi-label">Saldo do Mês</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card kpi-card h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-value text-info">R$ {{ contas_receber|floatformat:2 }}</div>
+                    <div class="kpi-label">Contas a Receber</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card kpi-card h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-value text-warning">R$ {{ contas_pagar|floatformat:2 }}</div>
+                    <div class="kpi-label">Contas a Pagar</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card kpi-card h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-value text-secondary">R$ {{ honorarios_pendentes|floatformat:2 }}</div>
+                    <div class="kpi-label">Honorários Pendentes</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs Operacionais -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h5 class="text-primary mb-3">
+                <i class="fas fa-cogs me-2"></i>Indicadores Operacionais
+            </h5>
+        </div>
+        <div class="col-md-3">
+            <div class="card kpi-card h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-value">{{ total_clientes }}</div>
+                    <div class="kpi-label">Total de Clientes</div>
+                    <small class="text-success">+{{ novos_clientes_mes }} este mês</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card kpi-card h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-value">{{ total_processos }}</div>
+                    <div class="kpi-label">Total de Processos</div>
+                    <small class="text-info">{{ processos_ativos }} ativos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card kpi-card h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-value text-danger">{{ processos_criticos }}</div>
+                    <div class="kpi-label">Processos Críticos</div>
+                    <small class="text-muted">Prazos próximos</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card kpi-card h-100">
+                <div class="card-body text-center">
+                    <div class="kpi-value">{{ processos_ativos|floatformat:0 }}%</div>
+                    <div class="kpi-label">Taxa de Atividade</div>
+                    <small class="text-muted">Processos ativos</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Receitas vs Despesas (Últimos 6 Meses)
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="receitasDespesasChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        Status dos Processos
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="statusProcessosChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabelas de Dados -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-exchange-alt me-2"></i>
+                        Movimentações Recentes
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tipo</th>
+                                    <th>Descrição</th>
+                                    <th>Valor</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for mov in movimentacoes_recentes %}
+                                <tr>
+                                    <td>
+                                        {% if mov.tipo == 'receita' %}
+                                            <span class="badge bg-success">{{ mov.get_tipo_display }}</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">{{ mov.get_tipo_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ mov.descricao|truncatechars:30 }}</td>
+                                    <td>R$ {{ mov.valor|floatformat:2 }}</td>
+                                    <td>
+                                        {% if mov.status == 'pago' %}
+                                            <span class="badge bg-success">{{ mov.get_status_display }}</span>
+                                        {% elif mov.status == 'pendente' %}
+                                            <span class="badge bg-warning">{{ mov.get_status_display }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ mov.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">
+                                        Nenhuma movimentação encontrada
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'financeiro:movimentacao_list' %}" class="btn btn-sm btn-outline-primary">
+                        Ver Todas as Movimentações
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>
+                        Processos com Prazos Próximos
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Processo</th>
+                                    <th>Cliente</th>
+                                    <th>Prazo</th>
+                                    <th>Dias</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for processo in processos_prazos %}
+                                <tr>
+                                    <td>{{ processo.numero_processo|truncatechars:15 }}</td>
+                                    <td>{{ processo.cliente.nome|truncatechars:20 }}</td>
+                                    <td>{{ processo.prazo_final|date:"d/m/Y" }}</td>
+                                    <td>
+                                        {% if processo.dias_para_prazo <= 3 %}
+                                            <span class="prazo-critico">{{ processo.dias_para_prazo }} dias</span>
+                                        {% elif processo.dias_para_prazo <= 7 %}
+                                            <span class="prazo-atencao">{{ processo.dias_para_prazo }} dias</span>
+                                        {% else %}
+                                            <span class="prazo-normal">{{ processo.dias_para_prazo }} dias</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">
+                                        Nenhum processo com prazo próximo
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'processos:list' %}" class="btn btn-sm btn-outline-primary">
+                        Ver Todos os Processos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toggle de Tema Flutuante -->
+<button class="theme-toggle" onclick="toggleTheme()" title="Alternar tema">
+    <i class="fas fa-adjust"></i>
+</button>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Dados do Django para JavaScript
+const mesesLabels = {{ meses_labels|safe }};
+const receitasData = {{ receitas_data|safe }};
+const despesasData = {{ despesas_data|safe }};
+const statusProcessos = {{ status_processos|safe }};
+
+// Gráfico Receitas vs Despesas
+const ctx1 = document.getElementById('receitasDespesasChart').getContext('2d');
+new Chart(ctx1, {
+    type: 'bar',
+    data: {
+        labels: mesesLabels,
+        datasets: [{
+            label: 'Receitas',
+            data: receitasData,
+            backgroundColor: 'rgba(102, 178, 255, 0.8)',
+            borderColor: 'rgba(102, 178, 255, 1)',
+            borderWidth: 1
+        }, {
+            label: 'Despesas',
+            data: despesasData,
+            backgroundColor: 'rgba(220, 53, 69, 0.8)',
+            borderColor: 'rgba(220, 53, 69, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return 'R$ ' + value.toLocaleString('pt-BR');
+                    }
+                }
+            }
+        },
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function(context) {
+                        return context.dataset.label + ': R$ ' + context.parsed.y.toLocaleString('pt-BR');
+                    }
+                }
+            }
+        }
+    }
+});
+
+// Gráfico Status dos Processos
+const ctx2 = document.getElementById('statusProcessosChart').getContext('2d');
+const statusLabels = statusProcessos.map(item => item.status);
+const statusCounts = statusProcessos.map(item => item.count);
+
+new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+        labels: statusLabels,
+        datasets: [{
+            data: statusCounts,
+            backgroundColor: [
+                'rgba(102, 178, 255, 0.8)',
+                'rgba(200, 147, 55, 0.8)',
+                'rgba(40, 167, 69, 0.8)',
+                'rgba(220, 53, 69, 0.8)',
+                'rgba(108, 117, 125, 0.8)'
+            ],
+            borderColor: [
+                'rgba(102, 178, 255, 1)',
+                'rgba(200, 147, 55, 1)',
+                'rgba(40, 167, 69, 1)',
+                'rgba(220, 53, 69, 1)',
+                'rgba(108, 117, 125, 1)'
+            ],
+            borderWidth: 2
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+
+// Função para alternar tema
+function toggleTheme() {
+    const html = document.documentElement;
+    const currentTheme = html.getAttribute('data-bs-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    html.setAttribute('data-bs-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    
+    // Atualizar ícone do botão flutuante
+    const themeToggle = document.querySelector('.theme-toggle i');
+    if (themeToggle) {
+        themeToggle.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+}
+
+// Aplicar tema salvo ao carregar a página
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-bs-theme', savedTheme);
+    
+    // Atualizar ícone do botão flutuante
+    const themeToggle = document.querySelector('.theme-toggle i');
+    if (themeToggle) {
+        themeToggle.className = savedTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+    }
+});
+</script>
+{% endblock %}

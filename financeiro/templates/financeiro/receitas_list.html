@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Receitas{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Lista de Receitas</h2>
+    
+    <div class="alert alert-info">
+        <strong>Template funcionando!</strong> Esta é a página de receitas.
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h5>Receitas</h5>
+        </div>
+        <div class="card-body">
+            {% if receitas %}
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Descrição</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for receita in receitas %}
+                        <tr>
+                            <td>{{ receita.descricao }}</td>
+                            <td>R$ {{ receita.valor }}</td>
+                            <td>{{ receita.status }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Nenhuma receita encontrada.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <a href="/financeiro/" class="btn btn-secondary mt-3">Voltar ao Dashboard</a>
+</div>
+{% endblock %}

@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if object %}Editar Processo{% else %}Novo Processo{% endif %} - Sistema Jurídico
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        {% if object %}
+                            <i class="bi bi-pencil"></i> Editar Processo
+                        {% else %}
+                            <i class="bi bi-plus-circle"></i> Novo Processo
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.numero_processo.id_for_label }}" class="form-label">
+                                    {{ form.numero_processo.label }} <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control {% if form.numero_processo.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.numero_processo.id_for_label }}"
+                                       name="{{ form.numero_processo.name }}" 
+                                       value="{{ form.numero_processo.value|default:'' }}"
+                                       required>
+                                {% if form.numero_processo.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.numero_processo.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.cliente.id_for_label }}" class="form-label">
+                                    {{ form.cliente.label }} <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select {% if form.cliente.errors %}is-invalid{% endif %}" 
+                                        id="{{ form.cliente.id_for_label }}"
+                                        name="{{ form.cliente.name }}"
+                                        required>
+                                    <option value="">Selecione um cliente</option>
+                                    {% for value, label in form.cliente.field.choices %}
+                                        {% if value %}
+                                            <option value="{{ value }}" 
+                                                    {% if form.cliente.value == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                {% if form.cliente.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.cliente.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.foro.id_for_label }}" class="form-label">
+                                    {{ form.foro.label }}
+                                </label>
+                                <input type="text" 
+                                       class="form-control {% if form.foro.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.foro.id_for_label }}"
+                                       name="{{ form.foro.name }}" 
+                                       value="{{ form.foro.value|default:'' }}">
+                                {% if form.foro.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.foro.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.vara.id_for_label }}" class="form-label">
+                                    {{ form.vara.label }}
+                                </label>
+                                <input type="text" 
+                                       class="form-control {% if form.vara.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.vara.id_for_label }}"
+                                       name="{{ form.vara.name }}" 
+                                       value="{{ form.vara.value|default:'' }}">
+                                {% if form.vara.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.vara.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.classe.id_for_label }}" class="form-label">
+                                    {{ form.classe.label }}
+                                </label>
+                                <input type="text" 
+                                       class="form-control {% if form.classe.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.classe.id_for_label }}"
+                                       name="{{ form.classe.name }}" 
+                                       value="{{ form.classe.value|default:'' }}">
+                                {% if form.classe.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.classe.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.assunto.id_for_label }}" class="form-label">
+                                    {{ form.assunto.label }}
+                                </label>
+                                <input type="text" 
+                                       class="form-control {% if form.assunto.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.assunto.id_for_label }}"
+                                       name="{{ form.assunto.name }}" 
+                                       value="{{ form.assunto.value|default:'' }}">
+                                {% if form.assunto.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.assunto.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.parte_contraria.id_for_label }}" class="form-label">
+                                    {{ form.parte_contraria.label }}
+                                </label>
+                                <input type="text" 
+                                       class="form-control {% if form.parte_contraria.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.parte_contraria.id_for_label }}"
+                                       name="{{ form.parte_contraria.name }}" 
+                                       value="{{ form.parte_contraria.value|default:'' }}">
+                                {% if form.parte_contraria.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.parte_contraria.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.advogado_responsavel.id_for_label }}" class="form-label">
+                                    {{ form.advogado_responsavel.label }}
+                                </label>
+                                <select class="form-select {% if form.advogado_responsavel.errors %}is-invalid{% endif %}" 
+                                        id="{{ form.advogado_responsavel.id_for_label }}"
+                                        name="{{ form.advogado_responsavel.name }}">
+                                    <option value="">Selecione um advogado</option>
+                                    {% for value, label in form.advogado_responsavel.field.choices %}
+                                        {% if value %}
+                                            <option value="{{ value }}" 
+                                                    {% if form.advogado_responsavel.value == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                {% if form.advogado_responsavel.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.advogado_responsavel.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-12 mb-3">
+                                <label for="{{ form.situacao_atual.id_for_label }}" class="form-label">
+                                    {{ form.situacao_atual.label }}
+                                </label>
+                                <textarea class="form-control {% if form.situacao_atual.errors %}is-invalid{% endif %}" 
+                                          id="{{ form.situacao_atual.id_for_label }}"
+                                          name="{{ form.situacao_atual.name }}" 
+                                          rows="3">{{ form.situacao_atual.value|default:'' }}</textarea>
+                                {% if form.situacao_atual.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.situacao_atual.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.status.id_for_label }}" class="form-label">
+                                    {{ form.status.label }}
+                                </label>
+                                <select class="form-select {% if form.status.errors %}is-invalid{% endif %}" 
+                                        id="{{ form.status.id_for_label }}"
+                                        name="{{ form.status.name }}">
+                                    {% for value, label in form.status.field.choices %}
+                                        <option value="{{ value }}" 
+                                                {% if form.status.value == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.status.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.status.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.risco.id_for_label }}" class="form-label">
+                                    {{ form.risco.label }}
+                                </label>
+                                <select class="form-select {% if form.risco.errors %}is-invalid{% endif %}" 
+                                        id="{{ form.risco.id_for_label }}"
+                                        name="{{ form.risco.name }}">
+                                    {% for value, label in form.risco.field.choices %}
+                                        <option value="{{ value }}" 
+                                                {% if form.risco.value == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.risco.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.risco.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-3 mb-3">
+                                <label for="{{ form.prioridade.id_for_label }}" class="form-label">
+                                    {{ form.prioridade.label }}
+                                </label>
+                                <select class="form-select {% if form.prioridade.errors %}is-invalid{% endif %}" 
+                                        id="{{ form.prioridade.id_for_label }}"
+                                        name="{{ form.prioridade.name }}">
+                                    {% for value, label in form.prioridade.field.choices %}
+                                        <option value="{{ value }}" 
+                                                {% if form.prioridade.value == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.prioridade.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.prioridade.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            {% if object %}
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Situação</label>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input {% if form.ativo.errors %}is-invalid{% endif %}" 
+                                           type="checkbox" 
+                                           id="{{ form.ativo.id_for_label }}"
+                                           name="{{ form.ativo.name }}"
+                                           {% if form.ativo.value %}checked{% endif %}>
+                                    <label class="form-check-label" for="{{ form.ativo.id_for_label }}">
+                                        {{ form.ativo.label }}
+                                    </label>
+                                    {% if form.ativo.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.ativo.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'processos:list' %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> 
+                                {% if object %}Atualizar{% else %}Criar{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+
+{% block title %}Processos - Sistema Jurídico{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3">Processos</h1>
+                <a href="{% url 'processos:create' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Novo Processo
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-3">
+                            <label for="search" class="form-label">Buscar</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="{{ request.GET.search }}" placeholder="Número, cliente, assunto...">
+                        </div>
+                        <div class="col-md-2">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">Todos</option>
+                                <option value="novo" {% if request.GET.status == 'novo' %}selected{% endif %}>Novo</option>
+                                <option value="em_andamento" {% if request.GET.status == 'em_andamento' %}selected{% endif %}>Em Andamento</option>
+                                <option value="suspenso" {% if request.GET.status == 'suspenso' %}selected{% endif %}>Suspenso</option>
+                                <option value="concluido" {% if request.GET.status == 'concluido' %}selected{% endif %}>Concluído</option>
+                                <option value="arquivado" {% if request.GET.status == 'arquivado' %}selected{% endif %}>Arquivado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="risco" class="form-label">Risco</label>
+                            <select class="form-select" id="risco" name="risco">
+                                <option value="">Todos</option>
+                                <option value="baixo" {% if request.GET.risco == 'baixo' %}selected{% endif %}>Baixo</option>
+                                <option value="medio" {% if request.GET.risco == 'medio' %}selected{% endif %}>Médio</option>
+                                <option value="alto" {% if request.GET.risco == 'alto' %}selected{% endif %}>Alto</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="prioridade" class="form-label">Prioridade</label>
+                            <select class="form-select" id="prioridade" name="prioridade">
+                                <option value="">Todas</option>
+                                <option value="baixa" {% if request.GET.prioridade == 'baixa' %}selected{% endif %}>Baixa</option>
+                                <option value="media" {% if request.GET.prioridade == 'media' %}selected{% endif %}>Média</option>
+                                <option value="alta" {% if request.GET.prioridade == 'alta' %}selected{% endif %}>Alta</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label for="ativo" class="form-label">Situação</label>
+                            <select class="form-select" id="ativo" name="ativo">
+                                <option value="">Todos</option>
+                                <option value="true" {% if request.GET.ativo == 'true' %}selected{% endif %}>Ativos</option>
+                                <option value="false" {% if request.GET.ativo == 'false' %}selected{% endif %}>Inativos</option>
+                            </select>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-end">
+                            <button type="submit" class="btn btn-outline-primary me-1">Filtrar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    {% if processos %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Processo</th>
+                                        <th>Cliente</th>
+                                        <th>Status</th>
+                                        <th>Risco</th>
+                                        <th>Prioridade</th>
+                                        <th>Situação</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for processo in processos %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ processo.numero_processo }}</strong>
+                                            <br><small class="text-muted">{{ processo.assunto|truncatechars:50 }}</small>
+                                        </td>
+                                        <td>{{ processo.cliente.nome }}</td>
+                                        <td>
+                                            {% if processo.status == 'novo' %}
+                                                <span class="badge bg-primary">Novo</span>
+                                            {% elif processo.status == 'em_andamento' %}
+                                                <span class="badge bg-info">Em Andamento</span>
+                                            {% elif processo.status == 'suspenso' %}
+                                                <span class="badge bg-warning">Suspenso</span>
+                                            {% elif processo.status == 'concluido' %}
+                                                <span class="badge bg-success">Concluído</span>
+                                            {% elif processo.status == 'arquivado' %}
+                                                <span class="badge bg-secondary">Arquivado</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if processo.risco == 'baixo' %}
+                                                <span class="badge bg-success">Baixo</span>
+                                            {% elif processo.risco == 'medio' %}
+                                                <span class="badge bg-warning">Médio</span>
+                                            {% elif processo.risco == 'alto' %}
+                                                <span class="badge bg-danger">Alto</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if processo.prioridade == 'baixa' %}
+                                                <span class="badge bg-light text-dark">Baixa</span>
+                                            {% elif processo.prioridade == 'media' %}
+                                                <span class="badge bg-warning">Média</span>
+                                            {% elif processo.prioridade == 'alta' %}
+                                                <span class="badge bg-danger">Alta</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if processo.ativo %}
+                                                <span class="badge bg-success">Ativo</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">Inativo</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a href="{% url 'processos:edit' processo.pk %}" 
+                                                   class="btn btn-outline-primary" title="Editar">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <button type="button" class="btn btn-outline-info" 
+                                                        onclick="changeStatus({{ processo.pk }}, '{{ processo.status }}')" title="Alterar Status">
+                                                    <i class="bi bi-arrow-repeat"></i>
+                                                </button>
+                                                {% if processo.ativo %}
+                                                    <button type="button" class="btn btn-outline-warning" 
+                                                            onclick="toggleStatus({{ processo.pk }}, false)" title="Desativar">
+                                                        <i class="bi bi-pause-circle"></i>
+                                                    </button>
+                                                {% else %}
+                                                    <button type="button" class="btn btn-outline-success" 
+                                                            onclick="toggleStatus({{ processo.pk }}, true)" title="Ativar">
+                                                        <i class="bi bi-play-circle"></i>
+                                                    </button>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Paginação -->
+                        {% if is_paginated %}
+                        <nav aria-label="Paginação">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=1{{ request.GET.urlencode }}">Primeira</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{{ request.GET.urlencode }}">Anterior</a>
+                                    </li>
+                                {% endif %}
+
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                                </li>
+
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{{ request.GET.urlencode }}">Próxima</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{{ request.GET.urlencode }}">Última</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-folder display-1 text-muted"></i>
+                            <h4 class="text-muted mt-3">Nenhum processo encontrado</h4>
+                            <p class="text-muted">Comece criando seu primeiro processo.</p>
+                            <a href="{% url 'processos:create' %}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Novo Processo
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Alteração de Status -->
+<div class="modal fade" id="statusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Alterar Status do Processo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="statusForm">
+                    <div class="mb-3">
+                        <label for="newStatus" class="form-label">Novo Status</label>
+                        <select class="form-select" id="newStatus">
+                            <option value="novo">Novo</option>
+                            <option value="em_andamento">Em Andamento</option>
+                            <option value="suspenso">Suspenso</option>
+                            <option value="concluido">Concluído</option>
+                            <option value="arquivado">Arquivado</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmStatusChange">Alterar Status</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação -->
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Ação</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="confirmButton">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentProcessoId = null;
+
+function changeStatus(processoId, currentStatus) {
+    currentProcessoId = processoId;
+    document.getElementById('newStatus').value = currentStatus;
+    new bootstrap.Modal(document.getElementById('statusModal')).show();
+}
+
+document.getElementById('confirmStatusChange').onclick = function() {
+    const newStatus = document.getElementById('newStatus').value;
+    
+    fetch(`/processos/${currentProcessoId}/change-status/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({status: newStatus})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Erro ao alterar status do processo.');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Erro ao alterar status do processo.');
+    });
+    
+    bootstrap.Modal.getInstance(document.getElementById('statusModal')).hide();
+};
+
+function toggleStatus(processoId, ativo) {
+    const action = ativo ? 'ativar' : 'desativar';
+    const message = `Tem certeza que deseja ${action} este processo?`;
+    
+    document.getElementById('confirmMessage').textContent = message;
+    
+    const confirmButton = document.getElementById('confirmButton');
+    confirmButton.onclick = function() {
+        fetch(`/processos/${processoId}/toggle-status/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ativo: ativo})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erro ao alterar situação do processo.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Erro ao alterar situação do processo.');
+        });
+        
+        bootstrap.Modal.getInstance(document.getElementById('confirmModal')).hide();
+    };
+    
+    new bootstrap.Modal(document.getElementById('confirmModal')).show();
+}
+</script>
+{% endblock %}

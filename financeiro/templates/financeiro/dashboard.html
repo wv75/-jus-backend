@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Financeiro{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Dashboard Financeiro</h2>
+    
+    <div class="alert alert-info">
+        <strong>Dashboard funcionando!</strong> Esta é a página principal do módulo financeiro.
+    </div>
+    
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body">
+                    <h5>Receitas</h5>
+                    <h3>R$ {{ total_receitas|default:"0,00" }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body">
+                    <h5>Despesas</h5>
+                    <h3>R$ {{ total_despesas|default:"0,00" }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body">
+                    <h5>Saldo</h5>
+                    <h3>R$ {{ saldo_atual|default:"0,00" }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body">
+                    <h5>Vencidas</h5>
+                    <h3>{{ contas_vencidas|default:"0" }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Links Rápidos</h5>
+                </div>
+                <div class="card-body">
+                    <a href="/financeiro/receitas/" class="btn btn-success me-2">Receitas</a>
+                    <a href="/financeiro/despesas/" class="btn btn-danger me-2">Despesas</a>
+                    <a href="/financeiro/honorarios/" class="btn btn-primary">Honorários</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

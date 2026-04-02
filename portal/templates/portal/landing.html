@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Sistema Jurídico - Início{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Hero Section -->
+    <div class="row min-vh-100 align-items-center">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold text-primary mb-4">
+                Sistema Jurídico
+            </h1>
+            <p class="lead mb-4">
+                Gerencie seus processos jurídicos de forma eficiente e mantenha seus clientes 
+                sempre informados sobre o andamento de seus casos.
+            </p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'portal:dashboard' %}" class="btn btn-primary btn-lg px-4 me-md-2">
+                        Acessar Dashboard
+                    </a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-primary btn-lg px-4 me-md-2">
+                        Entrar
+                    </a>
+                {% endif %}
+                <a href="{% url 'admin:index' %}" class="btn btn-outline-secondary btn-lg px-4">
+                    Administração
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="text-center">
+                <div class="bg-light rounded-3 p-5">
+                    <h3 class="text-muted">Funcionalidades</h3>
+                    <ul class="list-unstyled mt-4">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Gestão de Clientes
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Controle de Processos
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Andamentos Processuais
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Templates de Mensagens
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            Logs de Notificações
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle text-success me-2"></i>
+                            API REST Completa
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

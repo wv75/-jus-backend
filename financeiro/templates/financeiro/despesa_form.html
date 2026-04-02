@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if object %}Editar Despesa{% else %}Nova Despesa{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-arrow-down me-2"></i>
+                        {% if object %}Editar Despesa{% else %}Nova Despesa{% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8">
+                                {{ form.descricao|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.valor|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.data_vencimento|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.data_pagamento|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.plano_conta|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.conta_bancaria|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.cliente|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.processo|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                {{ form.status|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.numero_documento|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        {{ form.observacoes|as_crispy_field }}
+
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'financeiro:movimentacoes' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>Voltar
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-save me-1"></i>
+                                {% if object %}Atualizar{% else %}Salvar{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

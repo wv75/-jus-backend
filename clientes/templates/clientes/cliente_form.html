@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if object %}Editar Cliente{% else %}Novo Cliente{% endif %} - Sistema Jurídico
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        {% if object %}
+                            <i class="bi bi-pencil"></i> Editar Cliente
+                        {% else %}
+                            <i class="bi bi-plus-circle"></i> Novo Cliente
+                        {% endif %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="{{ form.nome.id_for_label }}" class="form-label">
+                                    {{ form.nome.label }} <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control {% if form.nome.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.nome.id_for_label }}"
+                                       name="{{ form.nome.name }}" 
+                                       value="{{ form.nome.value|default:'' }}"
+                                       required>
+                                {% if form.nome.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.nome.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.documento.id_for_label }}" class="form-label">
+                                    {{ form.documento.label }} <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control {% if form.documento.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.documento.id_for_label }}"
+                                       name="{{ form.documento.name }}" 
+                                       value="{{ form.documento.value|default:'' }}"
+                                       placeholder="CPF ou CNPJ"
+                                       required>
+                                {% if form.documento.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.documento.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Digite apenas números (11 para CPF, 14 para CNPJ)</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">
+                                    {{ form.email.label }}
+                                </label>
+                                <input type="email" 
+                                       class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.email.id_for_label }}"
+                                       name="{{ form.email.name }}" 
+                                       value="{{ form.email.value|default:'' }}">
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.email.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.telefone_whatsapp.id_for_label }}" class="form-label">
+                                    {{ form.telefone_whatsapp.label }}
+                                </label>
+                                <input type="text" 
+                                       class="form-control {% if form.telefone_whatsapp.errors %}is-invalid{% endif %}" 
+                                       id="{{ form.telefone_whatsapp.id_for_label }}"
+                                       name="{{ form.telefone_whatsapp.name }}" 
+                                       value="{{ form.telefone_whatsapp.value|default:'' }}"
+                                       placeholder="(11) 99999-9999">
+                                {% if form.telefone_whatsapp.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.telefone_whatsapp.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.canal_preferido.id_for_label }}" class="form-label">
+                                    <i class="fas fa-comments me-1" style="color: var(--gold);"></i>
+                                    {{ form.canal_preferido.label }}
+                                </label>
+                                <select class="form-select canal-preferido-select {% if form.canal_preferido.errors %}is-invalid{% endif %}" 
+                                        id="{{ form.canal_preferido.id_for_label }}"
+                                        name="{{ form.canal_preferido.name }}"
+                                        style="border: 2px solid var(--gold); background: linear-gradient(135deg, var(--light-beige) 0%, var(--light-green) 100%);">
+                                    {% for value, label in form.canal_preferido.field.choices %}
+                                        <option value="{{ value }}" 
+                                                {% if form.canal_preferido.value == value %}selected{% endif %}>
+                                            {{ label }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.canal_preferido.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.canal_preferido.errors.0 }}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1" style="color: var(--gold);"></i>
+                                    Selecione o canal de comunicação preferido do cliente
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input {% if form.consentimento_lgpd.errors %}is-invalid{% endif %}" 
+                                           type="checkbox" 
+                                           id="{{ form.consentimento_lgpd.id_for_label }}"
+                                           name="{{ form.consentimento_lgpd.name }}"
+                                           {% if form.consentimento_lgpd.value %}checked{% endif %}>
+                                    <label class="form-check-label" for="{{ form.consentimento_lgpd.id_for_label }}">
+                                        {{ form.consentimento_lgpd.label }}
+                                    </label>
+                                    {% if form.consentimento_lgpd.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.consentimento_lgpd.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="form-text">
+                                    Autorização para uso dos dados pessoais conforme Lei Geral de Proteção de Dados
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if object %}
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input {% if form.ativo.errors %}is-invalid{% endif %}" 
+                                           type="checkbox" 
+                                           id="{{ form.ativo.id_for_label }}"
+                                           name="{{ form.ativo.name }}"
+                                           {% if form.ativo.value %}checked{% endif %}>
+                                    <label class="form-check-label" for="{{ form.ativo.id_for_label }}">
+                                        {{ form.ativo.label }}
+                                    </label>
+                                    {% if form.ativo.errors %}
+                                        <div class="invalid-feedback">
+                                            {{ form.ativo.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'clientes:list' %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Voltar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> 
+                                {% if object %}Atualizar{% else %}Criar{% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.canal-preferido-select {
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(200, 147, 55, 0.2);
+}
+
+.canal-preferido-select:focus {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 0.2rem rgba(200, 147, 55, 0.25) !important;
+    background: linear-gradient(135deg, var(--light-beige) 0%, var(--light-green) 100%) !important;
+}
+
+.canal-preferido-select:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(200, 147, 55, 0.3);
+}
+
+[data-bs-theme="dark"] .canal-preferido-select {
+    background: linear-gradient(135deg, var(--dark-brown) 0%, #2c1810 100%) !important;
+    color: var(--light-beige) !important;
+}
+
+[data-bs-theme="dark"] .canal-preferido-select option {
+    background-color: var(--dark-brown);
+    color: var(--light-beige);
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Máscara para documento (CPF/CNPJ)
+document.getElementById('{{ form.documento.id_for_label }}').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    if (value.length <= 11) {
+        // CPF: 000.000.000-00
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d)/, '$1.$2');
+        value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    } else {
+        // CNPJ: 00.000.000/0000-00
+        value = value.replace(/^(\d{2})(\d)/, '$1.$2');
+        value = value.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+        value = value.replace(/\.(\d{3})(\d)/, '.$1/$2');
+        value = value.replace(/(\d{4})(\d)/, '$1-$2');
+    }
+    e.target.value = value;
+});
+
+// Máscara para telefone
+document.getElementById('{{ form.telefone_whatsapp.id_for_label }}').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    value = value.replace(/^(\d{2})(\d)/, '($1) $2');
+    value = value.replace(/(\d{5})(\d{4})$/, '$1-$2');
+    e.target.value = value;
+});
+</script>
+{% endblock %}

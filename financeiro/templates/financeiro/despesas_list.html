@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Despesas{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Lista de Despesas</h2>
+    <div class="alert alert-warning">
+        <strong>Template funcionando!</strong> Esta é a página de despesas.
+    </div>
+    <div class="card">
+        <div class="card-body">
+            {% if despesas %}
+                <table class="table">
+                    <thead>
+                        <tr><th>Descrição</th><th>Valor</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for despesa in despesas %}
+                        <tr>
+                            <td>{{ despesa.descricao }}</td>
+                            <td>R$ {{ despesa.valor }}</td>
+                            <td>{{ despesa.status }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Nenhuma despesa encontrada.</p>
+            {% endif %}
+        </div>
+    </div>
+    <a href="/financeiro/" class="btn btn-secondary mt-3">Voltar</a>
+</div>
+{% endblock %}

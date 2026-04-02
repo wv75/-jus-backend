@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Honorários{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Lista de Honorários</h2>
+    <div class="alert alert-success">
+        <strong>Template funcionando!</strong> Esta é a página de honorários.
+    </div>
+    <div class="card">
+        <div class="card-body">
+            {% if honorarios %}
+                <table class="table">
+                    <thead>
+                        <tr><th>Cliente</th><th>Valor</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for honorario in honorarios %}
+                        <tr>
+                            <td>{{ honorario.cliente }}</td>
+                            <td>R$ {{ honorario.valor }}</td>
+                            <td>{{ honorario.status }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Nenhum honorário encontrado.</p>
+            {% endif %}
+        </div>
+    </div>
+    <a href="/financeiro/" class="btn btn-secondary mt-3">Voltar</a>
+</div>
+{% endblock %}
