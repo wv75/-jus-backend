@@ -1,55 +1,57 @@
-from rest_framework import viewsets, filters, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
+from rest_framework             import viewsets, filters, status
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators  import action
+from rest_framework.response    import Response
+from django.shortcuts           import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from django_filters import rest_framework as django_filters
 
-from .models import Cliente
-from .serializers import ClienteSerializer
-
-
-class ClienteFilter(django_filters.FilterSet):
-    """Filtros avançados para a listagem de clientes."""
-    ativo = django_filters.BooleanFilter()
-    consentimento_lgpd = django_filters.BooleanFilter()
-    canal_preferido = django_filters.ChoiceFilter(choices=Cliente.CANAL_CHOICES)
-    updated_after = django_filters.DateTimeFilter(field_name='updated_at', lookup_expr='gte')
-    
-    class Meta:
-        model = Cliente
-        fields = ['ativo', 'consentimento_lgpd', 'canal_preferido']
+from .models      import PessoaFisica, PessoaJuridica
+from .serializers import PessoaFisicaSerializer, PessoaJuridicaSerializer
 
 
-class ClienteViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet para gerenciar clientes.
-    """
-    queryset = Cliente.objects.all()
-    serializer_class = ClienteSerializer
+class PessoaFisicaViewSet(viewsets.ModelViewSet):
+    queryset           = PessoaFisica.objects.ativos().select_related('cliente')
+    serializer_class   = PessoaFisicaSerializer
     permission_classes = [IsAuthenticated]
-    
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_class = ClienteFilter
-    search_fields = ['nome', 'documento', 'email', 'telefone_whatsapp']
-    ordering_fields = ['nome', 'created_at', 'updated_at']
-    
-    # CORREÇÃO: O nome do campo no modelo usa underscore (_).
-    ordering = ['-created_at']
+    filter_backends    = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields   = ['ativo', 'cliente__consentimento_lgpd', 'cliente__canal_preferido']
+    search_fields      = ['nome_completo', 'cpf', 'email', 'telefone']
+    ordering_fields    = ['nome_completo', 'created_at']
+    ordering           = ['nome_completo']
 
     @action(detail=True, methods=['post'])
     def toggle_status(self, request, pk=None):
-        """
-        Ação para ativar ou desativar um cliente.
-        URL: POST /api/v1/clientes/{pk}/toggle_status/
-        """
-        cliente = self.get_object()
+        pf            = get_object_or_404(PessoaFisica.objects.all(), pk=pk)
+        is_active     = request.data.get('ativo', not pf.ativo)
+        pf.ativo      = is_active
+        pf.save()
         
-        # Se 'ativo' não for passado no body, inverte o valor atual
-        is_active = request.data.get('ativo', not cliente.ativo)
+        pf.cliente.ativo = is_active
+        pf.cliente.save()
 
-        cliente.ativo = is_active
-        cliente.save()
+        serializer = self.get_serializer(pf)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
-        serializer = self.get_serializer(cliente)
+
+class PessoaJuridicaViewSet(viewsets.ModelViewSet):
+    queryset           = PessoaJuridica.objects.ativos().select_related('cliente', 'representante')
+    serializer_class   = PessoaJuridicaSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends    = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields   = ['ativo', 'cliente__consentimento_lgpd', 'cliente__canal_preferido']
+    search_fields      = ['razao_social', 'cnpj', 'representante__nome_completo']
+    ordering_fields    = ['razao_social', 'created_at']
+    ordering           = ['razao_social']
+
+    @action(detail=True, methods=['post'])
+    def toggle_status(self, request, pk=None):
+        pj            = get_object_or_404(PessoaJuridica.objects.all(), pk=pk)
+        is_active     = request.data.get('ativo', not pj.ativo)
+        pj.ativo      = is_active
+        pj.save()
+        
+        pj.cliente.ativo = is_active
+        pj.cliente.save()
+
+        serializer = self.get_serializer(pj)
         return Response(serializer.data, status=status.HTTP_200_OK)

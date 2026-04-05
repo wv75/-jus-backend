@@ -1,85 +1,89 @@
-from django.contrib.auth.models import User
-from django.db                  import transaction
+from django.contrib.auth.models import User, Group
 from rest_framework             import serializers
 from .models                    import Advogado
 
 
+class GroupSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = Group
+        fields = ['id', 'name']
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model            = User
-        fields           = ['id', 'username', 'email', 'last_login', 'first_name', 'last_name']
-        read_only_fields = fields
+        model  = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active']
 
 
-class AdvogadoCreateSerializer(serializers.ModelSerializer):
-    username       = serializers.CharField(write_only=True, required=True, max_length=150)
-    password       = serializers.CharField(write_only=True, required=True, style={'input_type': 'password'})
-    especialidades = serializers.CharField(allow_blank=True, required=False)
+class UserManagerSerializer(serializers.ModelSerializer):
+    groups   = serializers.PrimaryKeyRelatedField(many=True, queryset=Group.objects.all(), required=False)
+    password = serializers.CharField(write_only=True, required=False)
 
     class Meta:
-        model        = Advogado
-        fields       = [
-            'id', 'username', 'password', 'nome', 'sobrenome', 'cpf', 'rg',
-            'data_nascimento', 'sexo', 'estado_civil', 'telefone_celular', 'telefone_fixo',
-            'email', 'email_citacao', 'cep', 'logradouro', 'numero', 'complemento',
-            'bairro', 'cidade', 'uf', 'pais', 'oab_numero', 'oab_uf', 'cargo',
-            'nivel_profissional', 'area_atuacao_principal', 'especialidades',
-            'descricao_profissional', 'supervisor', 'tipo_contrato', 'valor_hora',
-            'pix_chave', 'banco_nome', 'agencia', 'conta', 'tipo_conta', 'cpf_cnpj_conta',
-            'documentos', 'documentos_pendentes', 'termo_assinado', 'ativo',
-        ]
-        extra_kwargs = {
-            'documentos': {'write_only': True, 'required': False}
-        }
+        model  = User
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'groups', 'password']
 
     def create(self, validated_data):
-        user_data          = {
-            'username': validated_data.pop('username'),
-            'password': validated_data.pop('password'),
-            'email'   : validated_data.get('email')
-        }
-        advogado_data      = validated_data
-        especialidades_str = advogado_data.pop('especialidades', None)
+        groups_data = validated_data.pop('groups', [])
+        password    = validated_data.pop('password', None)
+        
+        user = User(**validated_data)
+        if password:
+            user.set_password(password)
+        user.save()
+        
+        user.groups.set(groups_data)
+        return user
 
-        if especialidades_str:
-            advogado_data['especialidades'] = [s.strip() for s in especialidades_str.split(',') if s.strip()]
-        elif especialidades_str == '':
-            advogado_data['especialidades'] = []
+    def update(self, instance, validated_data):
+        groups_data = validated_data.pop('groups', None)
+        password    = validated_data.pop('password', None)
+        
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        if password:
+            instance.set_password(password)
+        instance.save()
 
-        try:
-            with transaction.atomic():
-                user            = User.objects.create_user(**user_data)
-                documentos_data = advogado_data.pop('documentos', [])
-                advogado        = Advogado.objects.create(usuario=user, **advogado_data)
-
-                if documentos_data:
-                    advogado.documentos.set(documentos_data)
-
-                return advogado
-
-        except Exception as e:
-            raise serializers.ValidationError(f"Erro ao criar usuário e perfil: {e}")
+        if groups_data is not None:
+            instance.groups.set(groups_data)
+            
+        return instance
 
 
 class AdvogadoSimpleSerializer(serializers.ModelSerializer):
-    full_name = serializers.CharField(read_only=True)
+    nome_completo = serializers.SerializerMethodField()
 
     class Meta:
         model  = Advogado
-        fields = ['id', 'full_name']
+        fields = ['id', 'nome', 'sobrenome', 'nome_completo', 'cargo', 'ativo']
 
-
-class UserNestedSerializer(serializers.ModelSerializer):
-    class Meta:
-        model            = User
-        fields           = ['username', 'email']
-        read_only_fields = fields
+    def get_nome_completo(self, obj):
+        return f"{obj.nome} {obj.sobrenome}"
 
 
 class AdvogadoListSerializer(serializers.ModelSerializer):
-    usuario = UserNestedSerializer(read_only=True)
+    usuario_email    = serializers.CharField(source='usuario.email', read_only=True)
+    usuario_username = serializers.CharField(source='usuario.username', read_only=True)
+    supervisor_nome  = serializers.SerializerMethodField()
+    criado_por_nome  = serializers.CharField(source='criado_por.username', read_only=True)
 
     class Meta:
-        model            = Advogado
-        fields           = ['id', 'nome', 'sobrenome', 'cargo', 'ativo', 'usuario']
-        read_only_fields = fields
+        model  = Advogado
+        fields = [
+            'id', 'nome', 'sobrenome', 'cargo', 'ativo', 'usuario', 
+            'usuario_email', 'usuario_username', 'supervisor', 'supervisor_nome', 
+            'criado_por_nome'
+        ]
+
+    def get_supervisor_nome(self, obj):
+        if hasattr(obj, 'supervisor') and obj.supervisor:
+            return f"{obj.supervisor.nome} {obj.supervisor.sobrenome}"
+        return None
+
+
+class AdvogadoCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = Advogado
+        fields = '__all__'

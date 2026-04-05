@@ -1,3 +1,4 @@
+from django.contrib.auth.models    import User, Group
 from rest_framework                import viewsets, filters, generics, status
 from rest_framework.permissions    import IsAuthenticated
 from rest_framework.pagination     import PageNumberPagination
@@ -7,13 +8,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 import django_filters
 
 from .models                       import Advogado
-from .serializers                  import AdvogadoSimpleSerializer, UserSerializer, AdvogadoCreateSerializer, AdvogadoListSerializer
+from .serializers                  import AdvogadoSimpleSerializer, UserSerializer, AdvogadoCreateSerializer, AdvogadoListSerializer, UserManagerSerializer, GroupSerializer
 
 
 class DefaultPagination(PageNumberPagination):
     page_size             = 25
     page_size_query_param = 'page_size'
     max_page_size         = 100
+
 
 class DropdownPagination(PageNumberPagination):
     page_size             = 1000
@@ -37,7 +39,7 @@ class UserDetailsAPIView(APIView):
         return Response(serializer.data)
 
 
-class UserManagementViewSet(viewsets.ModelViewSet):
+class AdvogadoManagementViewSet(viewsets.ModelViewSet):
     queryset           = Advogado.objects.select_related('usuario', 'supervisor', 'criado_por').all().order_by('nome')
     permission_classes = [IsAuthenticated]
     pagination_class   = DefaultPagination
@@ -62,3 +64,26 @@ class AdvogadoCreateView(generics.CreateAPIView):
     queryset           = Advogado.objects.all()
     serializer_class   = AdvogadoCreateSerializer
     permission_classes = [IsAuthenticated]
+
+
+class GroupViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset           = Group.objects.all().order_by('name')
+    serializer_class   = GroupSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class   = DropdownPagination
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset           = User.objects.all().prefetch_related('groups').order_by('username')
+    serializer_class   = UserManagerSerializer
+    permission_classes = [IsAuthenticated]
+    pagination_class   = DefaultPagination
+    filter_backends    = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields   = ['is_active', 'groups']
+    search_fields      = ['username', 'email', 'first_name', 'last_name']
+
+    def destroy(self, request, *args, **kwargs):
+        user           = self.get_object()
+        user.is_active = False
+        user.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)

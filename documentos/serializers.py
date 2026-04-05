@@ -1,5 +1,8 @@
 from rest_framework import serializers
 from .models        import CategoriaDocumento, Documento, TemplateDocumento, AssinaturaDigital
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
+from .models import DocumentoUsuario
 
 
 class CategoriaDocumentoSerializer(serializers.ModelSerializer):
@@ -67,3 +70,27 @@ class AssinaturaDigitalSerializer(serializers.ModelSerializer):
             'motivo_rejeicao', 'observacoes', 'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'data_solicitacao', 'data_assinatura', 'created_at', 'updated_at']
+
+
+User = get_user_model()
+
+class DocumentoUsuarioSerializer(serializers.ModelSerializer):
+    usuario      = serializers.PrimaryKeyRelatedField(queryset=User.objects.filter(is_active=True))
+    usuario_nome = serializers.CharField(source='usuario.get_full_name', read_only=True)
+    arquivo_url  = serializers.SerializerMethodField()
+
+    class Meta:
+        model            = DocumentoUsuario
+        fields           = [
+            'id', 'usuario', 'usuario_nome', 'titulo', 'data_registro', 
+            'descricao', 'arquivo', 'arquivo_url', 'ativo', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_arquivo_url(self, obj):
+        request = self.context.get('request')
+        if obj.arquivo and hasattr(obj.arquivo, 'url'):
+            if request is not None:
+                return request.build_absolute_uri(obj.arquivo.url)
+            return obj.arquivo.url
+        return None

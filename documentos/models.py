@@ -3,6 +3,8 @@ from django.contrib.auth.models import User
 from django.utils               import timezone
 from django.core.validators     import FileExtensionValidator
 import os
+from django.conf            import settings
+
 
 
 def upload_documento_path(instance, filename):
@@ -239,3 +241,29 @@ class LogAcessoDocumento(BaseModel):
 
     def __str__(self):
         return f"Doc: {self.documento_id} | Usuário: {self.usuario_id} | Ação: {self.acao}"
+    
+
+class DocumentoUsuario(models.Model):
+    usuario       = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='documentos')
+    titulo        = models.CharField(max_length=255)
+    data_registro = models.DateField(default=timezone.now)
+    descricao     = models.TextField(blank=True, default="")
+    arquivo       = models.FileField(
+        upload_to='documentos/usuarios/%Y/%m/',
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'jpeg', 'png'])]
+    )
+    ativo         = models.BooleanField(default=True)
+    created_at    = models.DateTimeField(auto_now_add=True)
+    updated_at    = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table            = 'config_documento_usuario'
+        verbose_name        = 'Documento de Usuário'
+        verbose_name_plural = 'Documentos de Usuários'
+        ordering            = ['-data_registro']
+        indexes             = [
+            models.Index(fields=['usuario', 'ativo']),
+        ]
+
+    def __str__(self):
+        return f"{self.titulo} - {self.usuario_id}"

@@ -2,10 +2,13 @@ from django.urls            import path, include
 from rest_framework.routers import DefaultRouter
 from .                      import views
 
-app_name    = 'accounts'
-router      = DefaultRouter()
 
-router.register(r'user-management', views.UserManagementViewSet, basename='user-management')
+app_name = 'accounts'
+router   = DefaultRouter()
+
+router.register(r'usuarios', views.UserViewSet, basename='usuario')
+router.register(r'grupos', views.GroupViewSet, basename='grupo')
+router.register(r'advogados-management', views.AdvogadoManagementViewSet, basename='advogados-management')
 router.register(r'advogados', views.AdvogadoViewSet, basename='advogados')
 
 urlpatterns = [

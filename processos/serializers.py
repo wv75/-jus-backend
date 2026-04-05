@@ -2,7 +2,7 @@ from rest_framework             import serializers
 from django.contrib.auth.models import User
 from .models                    import Processo
 from clientes.models            import Cliente
-from clientes.serializers       import ClienteSimpleSerializer
+from clientes.serializers       import ClienteBaseSerializer
 
 
 class ProcessoSerializer(serializers.ModelSerializer):
@@ -24,7 +24,7 @@ class ProcessoSerializer(serializers.ModelSerializer):
 
 
 class ProcessoListSerializer(serializers.ModelSerializer):
-    cliente_nome       = serializers.CharField(source='cliente.nome', read_only=True)
+    cliente_nome       = serializers.SerializerMethodField()
     advogado_nome      = serializers.CharField(source='advogado_responsavel.get_full_name', read_only=True)
     status_display     = serializers.CharField(source='get_status_display', read_only=True)
     risco_display      = serializers.CharField(source='get_risco_display', read_only=True)
@@ -39,9 +39,16 @@ class ProcessoListSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = fields
 
+    def get_cliente_nome(self, obj):
+        if hasattr(obj.cliente, 'pf'):
+            return obj.cliente.pf.nome_completo
+        if hasattr(obj.cliente, 'pj'):
+            return obj.cliente.pj.razao_social
+        return f"Cliente {obj.cliente_id}"
+
 
 class ProcessoDetailSerializer(ProcessoSerializer):
-    cliente = ClienteSimpleSerializer(read_only=True)
+    cliente = ClienteBaseSerializer(read_only=True)
 
     class Meta(ProcessoSerializer.Meta):
         pass

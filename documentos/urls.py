@@ -10,6 +10,7 @@ router.register(r'categorias', views.CategoriaDocumentoViewSet, basename='catego
 router.register(r'documentos', views.DocumentoViewSet, basename='documentos')
 router.register(r'templates', views.TemplateDocumentoViewSet, basename='templates')
 router.register(r'assinaturas', views.AssinaturaDigitalViewSet, basename='assinaturas')
+router.register(r'documentos-usuarios', views.DocumentoUsuarioViewSet, basename='documentos-usuarios')
 
 urlpatterns = [
     path('', include(router.urls)),
